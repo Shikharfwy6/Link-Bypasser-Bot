@@ -3,10 +3,19 @@ import bypasser
 import re
 import os
 import freewall
-
+import threading
+import subprocess
 
 app = Flask(__name__)
 
+# Telegram Bot ko background me chalane ke liye function
+def run_telegram_bot():
+    print("⚡ Starting Telegram Bot (main.py) in background...")
+    try:
+        # Yeh line main.py ko background me trigger kar degi
+        subprocess.run(["python", "main.py"])
+    except Exception as e:
+        print(f"❌ Error starting Telegram bot: {e}")
 
 def handle_index(ele):
     return bypasser.scrapeIndex(ele)
@@ -90,5 +99,10 @@ def index():
 
 
 if __name__ == "__main__":
+    # Web server start hone se pehle Telegram bot ko background thread me chalayein
+    bot_thread = threading.Thread(target=run_telegram_bot, daemon=True)
+    bot_thread.start()
+
+    # Flask Web Server start karein
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
