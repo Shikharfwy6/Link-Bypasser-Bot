@@ -1,0 +1,44 @@
+name: Run Telegram Link Bypasser Bot
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Isse aap GitHub UI se manually bhi bot start kar sakte hain
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-python-version: '3.10'
+        cache: 'pip' # Dependencies cache karne ke liye taaki next run fast ho
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        # Agar requirements.txt me kuch miss ho toh backup ke liye:
+        pip install pyrogram tgcrypto urlextract
+
+    - name: Run Bot
+      env:
+        # GitHub Secrets se variables load karne ke liye
+        TOKEN: ${{ secrets.TOKEN }}
+        HASH: ${{ secrets.HASH }}
+        ID: ${{ secrets.ID }}
+        DB_API: ${{ secrets.DB_API }}
+        DB_OWNER: ${{ secrets.DB_OWNER }}
+        DB_NAME: ${{ secrets.DB_NAME }}
+      run: |
+        # Agar config.json required hai aur env se data fallback ho raha hai,
+        # toh error avoid karne ke liye ek khali config.json create kar rahe hain
+        if [ ! -f config.json ]; then echo "{}" > config.json; fi
+        python app.py # Apni main script ka naam check kar lein (agar app.py hai toh thik hai)
+        
