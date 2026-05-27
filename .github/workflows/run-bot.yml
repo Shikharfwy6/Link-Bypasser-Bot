@@ -17,7 +17,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.10' # Python 3.10 standard aur stable hai is bot ke liye
+        python-version: '3.10' # Stable version for Pyrogram and Python scripts
         cache: 'pip'
 
     - name: Install Dependencies
@@ -35,16 +35,14 @@ jobs:
 
     - name: Run Bot
       env:
-        # Aapke Variables tab se credentials load karne ke liye vars. use kiya hai
-        TOKEN: ${{ vars.TOKEN }}
-        HASH: ${{ vars.HASH }}
-        ID: ${{ vars.ID }}
-        # Agar aap baad me database connect karein toh unhe Secrets me daal sakte hain
+        # Ab saara data Repository Secrets se load ho raha hai
+        TOKEN: ${{ secrets.TOKEN }}
+        HASH: ${{ secrets.HASH }}
+        ID: ${{ secrets.ID }}
         DB_API: ${{ secrets.DB_API }}
         DB_OWNER: ${{ secrets.DB_OWNER }}
         DB_NAME: ${{ secrets.DB_NAME }}
       run: |
-        # Agar config.json required hai aur env se data fallback ho raha hai,
-        # toh error avoid karne ke liye ek khali config.json create kar rahe hain
+        # Config file bypass rule
         if [ ! -f config.json ]; then echo "{}" > config.json; fi
         python app.py
